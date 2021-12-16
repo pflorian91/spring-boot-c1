@@ -1,5 +1,7 @@
 package com.webgenerals.springbootc1.response;
 
+import java.util.List;
+
 /**
  * UserRestResponse
  *
@@ -11,6 +13,7 @@ public class UserRestResponse {
     private String firstName;
     private String lastName;
     private String email;
+    private List<AddressRestResponse> addresses;
 
     public String getUserId() {
         return userId;
@@ -45,6 +48,15 @@ public class UserRestResponse {
 
     public UserRestResponse setEmail(String email) {
         this.email = email;
+        return this;
+    }
+
+    public List<AddressRestResponse> getAddresses() {
+        return addresses;
+    }
+
+    public UserRestResponse setAddresses(List<AddressRestResponse> addresses) {
+        this.addresses = addresses;
         return this;
     }
 }

@@ -1,19 +1,26 @@
 package com.webgenerals.springbootc1.controller;
 
+import com.webgenerals.springbootc1.dto.AddressDto;
 import com.webgenerals.springbootc1.dto.UserDto;
 import com.webgenerals.springbootc1.exceptions.UserServiceException;
 import com.webgenerals.springbootc1.model.UserDetailsRequestModel;
-import com.webgenerals.springbootc1.response.ErrorMessages;
-import com.webgenerals.springbootc1.response.OperationStatusModel;
-import com.webgenerals.springbootc1.response.RequestOperationStatus;
-import com.webgenerals.springbootc1.response.UserRestResponse;
+import com.webgenerals.springbootc1.response.*;
+import com.webgenerals.springbootc1.service.AddressService;
 import com.webgenerals.springbootc1.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,11 +30,14 @@ import java.util.stream.Collectors;
  * @author Florian Popa fpopa1991@gmail.com
  */
 @RestController
-@RequestMapping("users")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    AddressService addressService;
 
     @GetMapping(
             produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
@@ -95,5 +105,62 @@ public class UserController {
         userService.deleteUser(id);
 
         return returnValue;
+    }
+
+    @GetMapping(
+            path = "/{userId}/addresses",
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
+    )
+    public CollectionModel<AddressRestResponse> getAddresses(@PathVariable String userId) {
+        List<AddressRestResponse> responses = new ArrayList<>();
+
+        List<AddressDto> addressDtos = addressService.getAddressesByUserId(userId);
+
+        if (addressDtos != null && !addressDtos.isEmpty()) {
+            Type type = new TypeToken<List<AddressRestResponse>>() {
+            }.getType();
+            ModelMapper modelMapper = new ModelMapper();
+            responses = modelMapper.map(addressDtos, type);
+
+            for (AddressRestResponse addressRestResponse : responses) {
+                Link selfLink = WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddressById(userId, addressRestResponse.getAddressId()))
+                        .withSelfRel();
+                addressRestResponse.add(selfLink);
+            }
+        }
+
+        Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+        Link selfRel = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(userId)).withSelfRel();
+
+        return CollectionModel.of(responses, userLink, selfRel);
+    }
+
+    @GetMapping(
+            path = "/{userId}/addresses/{addressId}",
+            produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
+    )
+    public EntityModel<AddressRestResponse> getAddressById(@PathVariable String userId, @PathVariable String addressId) {
+        EntityModel<AddressRestResponse> entityModel = null;
+
+        AddressDto address = addressService.getAddressById(addressId);
+
+        if (address != null) {
+            ModelMapper modelMapper = new ModelMapper();
+            AddressRestResponse response = modelMapper.map(address, AddressRestResponse.class);
+
+            // http://localhost:8080/users/<userId>
+            Link userRel = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).withRel("user");
+            // using methodOn
+            Link addressesRel = WebMvcLinkBuilder
+                    .linkTo(WebMvcLinkBuilder.methodOn(UserController.class).getAddresses(userId))
+                    .withRel("addresses2");
+
+            Link selfRel = WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).slash("addresses").slash(addressId).withSelfRel();
+
+            entityModel = EntityModel.of(response, Arrays.asList(userRel, addressesRel, selfRel));
+        }
+
+        return entityModel;
     }
 }
