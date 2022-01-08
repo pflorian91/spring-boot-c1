@@ -7,12 +7,13 @@ import com.webgenerals.springbootc1.SpringApplicationContext;
  *
  * @author Florian Popa fpopa1991@gmail.com
  */
-class SecurityConstants {
+public class SecurityConstants {
 
-    static final long EXPIRATION_TIME = 864000000; // 10 days
+    public static final long EXPIRATION_TIME = 864000000; // 10 days
     static final String BEARER_TOKEN_PREFIX = "Bearer ";
     static final String HEADER_AUTHORIZATION = "Authorization";
-    static final String SING_UP_URL = "/users";
+    static final String SIGN_UP_URL = "/users";
+    static final String VERIFICATION_EMAIL_URL = "/users/email-verification";
 
     public static String getTokenSecret() {
         AppProperties properties = (AppProperties) SpringApplicationContext.getBean("AppProperties");

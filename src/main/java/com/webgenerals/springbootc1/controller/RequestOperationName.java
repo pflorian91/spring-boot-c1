@@ -1,5 +1,7 @@
 package com.webgenerals.springbootc1.controller;
 
+import javax.annotation.Resource;
+
 /**
  * RequestOperationName
  *
@@ -7,6 +9,6 @@ package com.webgenerals.springbootc1.controller;
  */
 public enum RequestOperationName {
 
-    DELETE
-
+    DELETE,
+    VERIFY_EMAIL;
 }
