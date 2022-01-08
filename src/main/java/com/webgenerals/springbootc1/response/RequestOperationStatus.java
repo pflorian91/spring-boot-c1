@@ -1,7 +1,5 @@
 package com.webgenerals.springbootc1.response;
 
-import javax.annotation.Resource;
-
 /**
  * RequestOperationStatus
  *
@@ -9,5 +7,5 @@ import javax.annotation.Resource;
  */
 public enum RequestOperationStatus {
     ERROR,
-    SUCCESS;
+    SUCCESS
 }

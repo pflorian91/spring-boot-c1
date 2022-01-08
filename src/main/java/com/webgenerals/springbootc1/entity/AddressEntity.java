@@ -1,7 +1,5 @@
 package com.webgenerals.springbootc1.entity;
 
-import com.webgenerals.springbootc1.dto.UserDto;
-
 import javax.persistence.*;
 import java.io.Serializable;
 

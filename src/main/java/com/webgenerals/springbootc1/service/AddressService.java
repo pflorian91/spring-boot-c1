@@ -12,5 +12,6 @@ import java.util.List;
 public interface AddressService {
 
     List<AddressDto> getAddressesByUserId(String userId);
+
     AddressDto getAddressById(String addressId);
 }
