@@ -3,6 +3,8 @@ package com.webgenerals.springbootc1.controller;
 import com.webgenerals.springbootc1.dto.AddressDto;
 import com.webgenerals.springbootc1.dto.UserDto;
 import com.webgenerals.springbootc1.exceptions.UserServiceException;
+import com.webgenerals.springbootc1.model.PasswordResetModel;
+import com.webgenerals.springbootc1.model.PasswordResetRequestModel;
 import com.webgenerals.springbootc1.model.UserDetailsRequestModel;
 import com.webgenerals.springbootc1.response.*;
 import com.webgenerals.springbootc1.service.AddressService;
@@ -179,6 +181,49 @@ public class UserController {
             returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
         } else {
             returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+        }
+
+        return returnValue;
+    }
+
+    @PostMapping(
+            path = "/password-reset-request",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public OperationStatusModel requestResetPassword(@RequestBody PasswordResetRequestModel model) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+
+        boolean operationResult = userService.requestPasswordReset(model.getEmail());
+
+        returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());
+        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        if (operationResult) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        }
+
+        return returnValue;
+    }
+
+    @PostMapping(
+            path = "/password-reset",
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}
+    )
+    public OperationStatusModel resetPassword(@RequestBody PasswordResetModel model) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+
+        boolean operationResult = userService.resetPassword(
+                model.getToken(),
+                model.getPassword()
+        );
+
+        returnValue.setOperationName(RequestOperationName.PASSWORD_RESET.name());
+        returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+
+        if (operationResult) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
         }
 
         return returnValue;
